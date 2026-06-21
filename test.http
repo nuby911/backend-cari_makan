@@ -1,0 +1,43 @@
+### 1. Test Server Berjalan
+GET http://localhost:5000/health
+
+### 2. Login sebagai Admin
+# Response akan mengembalikan token JWT. Salin token tersebut!
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 3. Login sebagai Kasir
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "kasir",
+  "password": "kasir123"
+}
+
+### 4. Melihat Daftar Makanan (Public)
+GET http://localhost:5000/api/foods
+
+### 5. Melihat Daftar Promo (Public)
+GET http://localhost:5000/api/promos
+
+### 6. Membuat Pesanan (Public)
+POST http://localhost:5000/api/orders
+Content-Type: application/json
+
+{
+  "table_number": "Meja 12",
+  "items": [
+    {
+      "food_id": 1,
+      "qty": 2,
+      "notes": "Tidak pedas"
+    }
+  ],
+  "promo_code": "WEEKEND10"
+}

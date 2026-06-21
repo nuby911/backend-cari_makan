@@ -1,0 +1,23 @@
+{
+  "name": "resto-order-backend",
+  "version": "1.5.0",
+  "description": "Sistem Pemesanan Mandiri Restoran v1.5 Backend Central Engine",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/scripts/migrate.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3",
+    "sharp": "^0.33.2",
+    "ws": "^8.16.0"
+  }
+}
