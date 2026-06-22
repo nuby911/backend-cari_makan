@@ -1,32 +1,27 @@
-import { WebSocketServer, WebSocket } from 'ws';
+import { Server } from 'socket.io';
 
-let wss = null;
+let io = null;
 
 export const initWebSocket = (server) => {
-  wss = new WebSocketServer({ server });
+  io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
 
-  wss.on('connection', (ws) => {
-    console.log('New WebSocket connection established.');
+  io.on('connection', (socket) => {
+    console.log(`New Socket.io connection: ${socket.id}`);
 
-    ws.on('message', (message) => {
-      console.log('Received message:', message.toString());
-    });
-
-    ws.on('close', () => {
-      console.log('WebSocket connection closed.');
+    socket.on('disconnect', () => {
+      console.log(`Socket.io disconnected: ${socket.id}`);
     });
   });
 
-  console.log('WebSocket server initialized.');
+  console.log('Socket.io server initialized.');
 };
 
 export const broadcast = (type, data) => {
-  if (!wss) return;
-
-  const payload = JSON.stringify({ type, data });
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(payload);
-    }
-  });
+  if (!io) return;
+  io.emit('message', { type, data });
 };

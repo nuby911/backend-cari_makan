@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import http from 'http';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,6 +22,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware dasar
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,7 +41,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'Backend is running correctly.' });
 });
 
-// Inisialisasi WebSocket menggunakan HTTP server
+// Inisialisasi Socket.io menggunakan HTTP server
 initWebSocket(server);
 
 const PORT = process.env.PORT || 5000;
@@ -47,3 +49,4 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+

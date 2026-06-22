@@ -5,9 +5,19 @@ import { verifyToken, isAdmin } from '../middlewares/auth.js';
 const router = express.Router();
 
 // GET /api/promos
+// - Tanpa param: hanya promo aktif (publik/customer)
+// - ?all=true + token admin: semua promo
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM promos WHERE is_active = TRUE ORDER BY created_at DESC');
+    const showAll = req.query.all === 'true';
+    let query = 'SELECT * FROM promos ORDER BY created_at DESC';
+    
+    if (!showAll) {
+      // Publik: hanya promo aktif dan belum kadaluarsa
+      query = 'SELECT * FROM promos WHERE is_active = TRUE AND expiry_date > NOW() ORDER BY created_at DESC';
+    }
+    
+    const { rows } = await pool.query(query);
     res.status(200).json(rows);
   } catch (error) {
     console.error('Fetch promos error:', error);
