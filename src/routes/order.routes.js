@@ -246,7 +246,30 @@ router.post('/history', async (req, res) => {
 // GET /api/orders (Kasir/Admin)
 router.get('/', [verifyToken, isKasirOrAdmin], async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM orders WHERE payment_status = 'paid' ORDER BY created_at DESC");
+    const queryText = `
+      SELECT o.*, 
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'food_id', oi.food_id,
+                   'qty', oi.qty,
+                   'notes', oi.notes,
+                   'name', f.name,
+                   'price', f.price,
+                   'discount_price', f.discount_price
+                 )
+               ) FILTER (WHERE oi.id IS NOT NULL),
+               '[]'::json
+             ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      LEFT JOIN foods f ON oi.food_id = f.id
+      WHERE o.payment_status = 'paid'
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `;
+    const { rows } = await pool.query(queryText);
     res.status(200).json(rows);
   } catch (error) {
     console.error('Fetch orders error:', error);
