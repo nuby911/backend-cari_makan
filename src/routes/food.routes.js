@@ -8,7 +8,7 @@ const router = express.Router();
 // GET /api/foods
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM foods ORDER BY category, name');
+    const { rows } = await pool.query('SELECT * FROM foods WHERE is_deleted = false ORDER BY category, name');
     res.status(200).json(rows);
   } catch (error) {
     console.error('Fetch foods error:', error);
@@ -69,7 +69,7 @@ router.put('/:id', [verifyToken, isAdmin, upload.single('image'), processImage],
 router.delete('/:id', [verifyToken, isAdmin], async (req, res) => {
   const { id } = req.params;
   try {
-    const { rowCount } = await pool.query('DELETE FROM foods WHERE id = $1', [id]);
+    const { rowCount } = await pool.query('UPDATE foods SET is_deleted = true WHERE id = $1', [id]);
     if (rowCount === 0) return res.status(404).json({ error: 'Food not found' });
     res.status(200).json({ message: 'Food deleted successfully' });
   } catch (error) {

@@ -89,11 +89,15 @@ router.get('/verify/:transaction_id', async (req, res) => {
 
 // POST /api/orders (Public)
 router.post('/', async (req, res) => {
-  const { customer_name, table_number, items, promo_code } = req.body;
+  const { customer_name, table_number, order_type = 'dine_in', items, promo_code } = req.body;
   // items: [{ food_id: 1, qty: 2, notes: '' }]
 
-  if (!customer_name || !table_number || !items || items.length === 0) {
-    return res.status(400).json({ error: 'customer_name, table_number, and items are required' });
+  if (!customer_name || !items || items.length === 0) {
+    return res.status(400).json({ error: 'customer_name and items are required' });
+  }
+
+  if (order_type === 'dine_in' && !table_number) {
+    return res.status(400).json({ error: 'table_number is required for dine in' });
   }
 
   const client = await pool.connect();
@@ -153,9 +157,9 @@ router.post('/', async (req, res) => {
     // 3. Create Order
     const initialPaymentStatus = total_price === 0 ? 'paid' : 'pending';
     const { rows: orderRows } = await client.query(
-      `INSERT INTO orders (customer_name, table_number, subtotal_price, discount_amount, total_price, transaction_id, promo_code_used, payment_status) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [customer_name, table_number, subtotal_price, discount_amount, total_price, transaction_id, promo_code || null, initialPaymentStatus]
+      `INSERT INTO orders (customer_name, table_number, order_type, subtotal_price, discount_amount, total_price, transaction_id, promo_code_used, payment_status) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [customer_name, order_type === 'dine_in' ? table_number : null, order_type, subtotal_price, discount_amount, total_price, transaction_id, promo_code || null, initialPaymentStatus]
     );
     const order = orderRows[0];
 
@@ -219,6 +223,23 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: error.message || 'Internal server error' });
   } finally {
     client.release();
+  }
+});
+// POST /api/orders/history (Public)
+router.post('/history', async (req, res) => {
+  const { transaction_ids } = req.body;
+  if (!Array.isArray(transaction_ids) || transaction_ids.length === 0) {
+    return res.json([]);
+  }
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, customer_name, table_number, order_type, total_price, payment_status, order_status, transaction_id, created_at FROM orders WHERE transaction_id = ANY($1) ORDER BY created_at DESC',
+      [transaction_ids]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Fetch order history error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

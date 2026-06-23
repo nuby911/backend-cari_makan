@@ -55,7 +55,8 @@ const migrate = async () => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
-        table_number VARCHAR(10) NOT NULL,
+        table_number VARCHAR(10),
+        order_type VARCHAR(20) DEFAULT 'dine_in',
         subtotal_price INT NOT NULL,
         discount_amount INT DEFAULT 0,
         total_price INT NOT NULL,
