@@ -42,7 +42,7 @@ const migrate = async () => {
         name VARCHAR(150) NOT NULL,
         price INT NOT NULL,
         discount_price INT DEFAULT 0,
-        category VARCHAR(50) CHECK (category IN ('makanan', 'minuman', 'cemilan')) NOT NULL,
+        category VARCHAR(50) CHECK (category IN ('makanan', 'minuman', 'cemilan', 'desert')) NOT NULL,
         image_url TEXT NOT NULL,
         description TEXT,
         is_available BOOLEAN DEFAULT TRUE,

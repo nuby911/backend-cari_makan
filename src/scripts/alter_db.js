@@ -18,6 +18,26 @@ const alterDb = async () => {
       ALTER COLUMN table_number DROP NOT NULL;
     `);
 
+    // Update foods category check constraint to include 'desert'
+    await client.query(`
+      DO $$
+      DECLARE
+          r RECORD;
+      BEGIN
+          FOR r IN
+              SELECT constraint_name
+              FROM information_schema.constraint_column_usage
+              WHERE table_name = 'foods' AND column_name = 'category'
+          LOOP
+              EXECUTE 'ALTER TABLE foods DROP CONSTRAINT ' || quote_ident(r.constraint_name);
+          END LOOP;
+      END $$;
+    `);
+    
+    await client.query(`
+      ALTER TABLE foods ADD CONSTRAINT foods_category_check CHECK (category IN ('makanan', 'minuman', 'cemilan', 'desert'));
+    `);
+
     await client.query('COMMIT');
     console.log('Alter database completed successfully.');
   } catch (error) {
