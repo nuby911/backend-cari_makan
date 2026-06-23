@@ -1,81 +1,81 @@
-# Resto Order Backend
+# Cari Makan - Backend
 
-Sistem Pemesanan Mandiri Restoran v1.5 Backend Central Engine.
-Repositori ini merupakan backend dari sistem pemesanan restoran ("Cari Makan"). 
+Ini adalah repositori Backend untuk aplikasi "Cari Makan" (Pesan Makan). Backend ini dibangun menggunakan **Node.js** dan **Express.js** serta menggunakan **PostgreSQL** sebagai basis datanya. Backend ini bertanggung jawab atas pengelolaan data (makanan, pesanan, promo, pengguna), autentikasi, integrasi payment gateway, dan update secara real-time menggunakan WebSockets.
 
-## Teknologi
+## 🚀 Fitur Utama
 
-Backend ini dibangun menggunakan teknologi berikut:
-- **Node.js** & **Express.js** untuk server backend
-- **PostgreSQL** untuk database relasional
-- **WebSocket (ws)** untuk komunikasi real-time
-- **JSON Web Token (JWT)** untuk autentikasi dan otorisasi
-- **Cloudinary** & **Multer** & **Sharp** untuk manajemen file/gambar
-- **Bcryptjs** untuk hashing password
+* **Authentication & Authorization:** Login untuk admin menggunakan JWT (JSON Web Token) dan enkripsi password dengan bcrypt.
+* **Food Management:** Endpoint REST API untuk membuat, membaca, memperbarui, dan menghapus (CRUD) daftar makanan. Mendukung *image upload* yang terintegrasi dengan Multer dan Cloudinary.
+* **Order Management:** Mengelola alur dan siklus pesanan dari pelanggan, mulai dari proses *checkout* hingga pesanan diselesaikan.
+* **Promo Management:** Sistem manajemen kode promo dan potongan diskon.
+* **Payment Integration:** Endpoint *webhook* untuk menerima notifikasi status pembayaran otomatis dari payment gateway (Midtrans).
+* **Real-time Notifications:** Dukungan WebSockets (Socket.io) untuk memperbarui status pesanan dari pelanggan secara langsung tanpa perlu me-refresh halaman.
 
-## Persyaratan Sistem
+## 🛠️ Teknologi yang Digunakan
 
-Pastikan Anda telah menginstal beberapa alat berikut sebelum memulai:
-- [Node.js](https://nodejs.org/) (Versi 16 atau lebih baru)
-- [PostgreSQL](https://www.postgresql.org/)
-- Akun [Cloudinary](https://cloudinary.com/)
-- Akun [Midtrans](https://midtrans.com/) (Jika mengaktifkan payment gateway)
+* **Runtime:** [Node.js](https://nodejs.org/)
+* **Framework API:** [Express.js](https://expressjs.com/)
+* **Database:** PostgreSQL (Driver: `pg`)
+* **Real-time Engine:** Socket.io & `ws`
+* **Payment Gateway:** Midtrans Client
+* **Image Processing & Upload:** Multer, Sharp, Cloudinary
+* **Security & Auth:** JSONWebToken (JWT), BcryptJS, CORS, Dotenv
 
-## Instalasi
+## 📁 Struktur Direktori Utama
 
-1. Kloning repositori ini (atau unduh zip-nya):
+```text
+backend/
+├── src/
+│   ├── config/       # Konfigurasi koneksi Database (db.js) dan WebSockets (websocket.js)
+│   ├── middlewares/  # Custom Middleware seperti autentikasi (auth.js) dan upload gambar (upload.js)
+│   ├── routes/       # Route endpoint API (auth, food, order, promo, webhook)
+│   ├── scripts/      # Script bantu untuk migrasi database (migrate.js)
+│   └── server.js     # Entry point utama (menjalankan server Express)
+├── .env.example      # Contoh kerangka file environment variables
+├── package.json      # Konfigurasi project dan daftar dependensi npm
+└── README.md         # Dokumentasi panduan project
+```
+
+## ⚙️ Cara Menjalankan Project Secara Lokal
+
+### Prasyarat
+* [Node.js](https://nodejs.org/) (disarankan versi LTS) sudah terinstal.
+* PostgreSQL database sudah terinstal dan berjalan.
+
+### Langkah-langkah Instalasi
+
+1. Buka terminal dan arahkan masuk ke direktori backend:
    ```bash
-   git clone https://github.com/nuby911/backend-cari_makan.git
    cd backend
    ```
 
-2. Instal semua dependensi:
+2. Instal seluruh dependensi yang dibutuhkan menggunakan npm:
    ```bash
    npm install
    ```
 
-3. Salin file `.env.example` menjadi `.env` dan konfigurasikan isinya sesuai dengan environment Anda:
+3. Konfigurasi Environment Variables:
+   * Salin file `.env.example` dan ubah namanya menjadi `.env` (atau buat file `.env` baru jika tidak ada).
+   * Isi konfigurasi di dalam file `.env` dengan kredensial milik Anda, seperti:
+     - Konfigurasi URL Database PostgreSQL.
+     - Secret key untuk JWT.
+     - API Key untuk Cloudinary (jika menggunakan fitur upload gambar).
+     - Server Key untuk Midtrans (jika menggunakan fitur payment gateway).
+
+4. Jalankan Migrasi Database (untuk membuat tabel yang dibutuhkan secara otomatis):
    ```bash
-   cp .env.example .env
+   npm run migrate
    ```
 
-## Konfigurasi Environment (`.env`)
+5. Jalankan development server:
+   ```bash
+   npm run dev
+   ```
 
-Atur variabel environment berikut pada file `.env` Anda:
+6. Server akan berjalan dan siap menerima request (biasanya berjalan di port `5000` atau sesuai konfigurasi `PORT` di dalam `.env`).
 
-```env
-PORT=5000
-DATABASE_URL=postgres://username:password@localhost:5432/RestoOrderDB
-JWT_SECRET=supersecretkey_kasir123
-MIDTRANS_SERVER_KEY=SB-Mid-Server-xxxxxx
-CLOUDINARY_CLOUD_NAME=nama_cloud_kamu
-CLOUDINARY_API_KEY=key_api_cloudinary
-CLOUDINARY_API_SECRET=secret_api_cloudinary
-```
-*(Ganti nilai-nilai di atas dengan kredensial database dan API Anda yang sebenarnya)*
+## 📦 Scripts yang Tersedia di `package.json`
 
-## Migrasi Database
-
-Jalankan perintah berikut untuk membuat/migrasi tabel ke database PostgreSQL:
-```bash
-npm run migrate
-```
-
-## Menjalankan Server
-
-- **Mode Development** (dengan watch menggunakan fitur bawaan Node.js):
-  ```bash
-  npm run dev
-  ```
-- **Mode Production**:
-  ```bash
-  npm start
-  ```
-
-Server akan berjalan pada port yang telah dikonfigurasikan di `.env` (secara default `http://localhost:5000`).
-
-## Struktur Proyek
-
-- `src/` - Berisi seluruh kode sumber (controllers, routes, services, middleware, models).
-- `src/server.js` - Titik masuk (entry point) utama untuk menjalankan server backend.
-- `src/scripts/migrate.js` - Script untuk migrasi skema database.
+* `npm start`       : Menjalankan server Node.js untuk tahap production.
+* `npm run dev`     : Menjalankan aplikasi dengan mode *watch* (server akan otomatis direstart jika ada perubahan file).
+* `npm run migrate` : Mengeksekusi script untuk menjalankan migrasi dan pembuatan skema database.
